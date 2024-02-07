@@ -1,0 +1,9 @@
+/* In App.css */
+@import "~react-datepicker/dist/react-datepicker.css";
+
+
+
+/* Style for the date picker container */
+.date-picker-container {
+    text-align: center;
+  }
