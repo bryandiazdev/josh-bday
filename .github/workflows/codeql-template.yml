@@ -1,0 +1,50 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [ 'javascript', 'python', 'go', 'java', 'ruby' ]
+        # To include more versions, you can define a version matrix like below:
+        # versions: [14.x, 16.x] (for Node.js)
+        # Later use matrix.version in the workflow steps if necessary
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3 # Updated to the latest version
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        config-file: .github/codeql/codeql-config.yml # Specify if you have a custom config
+
+    - name: Autobuild
+      run: |
+        if [ -f build.gradle ]; then
+          ./gradlew build -x test
+        elif [ -f pom.xml ]; then
+          mvn compile -DskipTests
+        elif [ -f package.json ]; then
+          npm install
+          npm run build # Include this if you have a build step defined in package.json
+        elif [ -f Gemfile ]; then
+          bundle install
+        else
+          echo "No build instructions found."
+        fi
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
